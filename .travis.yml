@@ -1,0 +1,63 @@
+# use Java and non-root
+dist: trusty
+sudo: false
+language: Java
+jdk: oraclejdk8
+
+# ignore the virtualenv that Travis creates
+env:
+  global:
+    - PIPENV_VENV_IN_PROJECT=1
+    - PIPENV_IGNORE_VIRTUALENVS=1
+
+# install the Markdown linting program called mdl
+before_install:
+  # download the markdown linting tool, mdl, as a Ruby gem
+  - gem install mdl
+  # download gradle as a zip file
+  - wget https://services.gradle.org/distributions/gradle-4.6-bin.zip
+  - unzip -d $HOME gradle-4.6-bin.zip
+  # delete the downloaded file
+  - rm -rf gradle-4.6-bin.zip
+  # add gradle bin to path at the beginning to ensure it overwrites old gradle
+  - export PATH="$HOME/gradle-4.6/bin:$PATH"
+  # switch to Python 3.6.3 globally, install python dependencies
+  - pyenv global 3.6.3
+  - pip install --upgrade pip
+  - pip install pipenv
+  # do not allow Travis to use standard error for debugging purposes
+  - unset _JAVA_OPTIONS
+
+# cache to improve build speed
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.pip-cache/
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+# delete any cached version of GatorGrader and require a fresh installation
+before_script:
+  - rm -rf $HOME/.local/share/gatorgrader
+
+# run checks on the README file with mdl
+# run checks on a student's Java code through gradle and GatorGrader
+# run checks on a student's Markdown writing through GatorGrader
+# Note: "gradle grade" automatically installs GatorGrader and runs all the checks
+# Note: Although "gradle grade" runs in a Docker container,
+# this is not done in CI because Travis CI does not currently support MacOS,
+# which would limit the ability to do cross-platform runs of these checks.
+script:
+  # lint the assignment's documentation: see .mdlrc for modifications
+  - mdl README.md
+  # Java: see build.gradle for details about the build configuration
+  - gradle --version
+  - gradle clean
+  - gradle check
+  - gradle build
+  - gradle run
+  # GatorGrader: see config/gatorgrader.yml for details about all checks;
+  # not that grading skips the build task since submitted code may not build
+  - gradle grade -x build
