@@ -1,0 +1,60 @@
+// available commands:
+// "gradle grade": run GatorGrader to assess completion of learning objectives
+// "gradle check": run checkstyle to assess code quality
+// "gradle clean": clean the project of all derived files
+// "gradle build": create the bytecode from the source code
+// "gradle run": run the program and produce output
+
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+    mavenLocal()
+    dependencies {
+      // other option, only needed for specifying a specific version of the Gradle plugin:
+      // classpath "gradle.plugin.org.gatored:gatorgradle:0.4.4"
+      classpath "gradle.plugin.org.gatored:gatorgradle:+"
+    }
+  }
+}
+
+// apply the version of the gradle plugin
+apply plugin: 'java'
+apply plugin: 'org.gatored.gatorgradle'
+
+// declare the repositories that are used to meet dependencies
+repositories {
+  mavenLocal()
+  jcenter()
+  mavenCentral()
+}
+
+// specify the use of the gradle version
+wrapper {
+  gradleVersion = '4.9'
+}
+
+// declare values to place in the manifest file in the JAR
+jar {
+  manifest {
+    attributes(
+        'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+        'Main-Class': 'practicalsix.RollAndSumDice'
+        )
+  }
+}
+
+// give the name of the application to run with "gradle run" command
+apply plugin: 'application'
+mainClassName = 'practicalsix.RollAndSumDice'
+
+// perform checkstyle checking with the "gradle check" command
+apply plugin: 'checkstyle'
+checkstyle.toolVersion = '8.1'
+checkstyle {
+  ignoreFailures = false
+  maxWarnings = 0
+  maxErrors = 0
+  configFile = new File(rootDir, "config/checkstyle/google_checks.xml")
+}
