@@ -1,0 +1,60 @@
+---
+name: cs100-F2019-practical6
+break: true
+indent: 4
+---
+
+# Learn more about GatorGrader and its supported checks by visiting this web site:
+# https://github.com/GatorEducator/gatorgrader
+
+# Explanation:
+# --> a check without an "--exact" runs a count for an entity as an "at least"
+# --> checks below a file in a specified directory are for that specific file and directory
+# --> checks that appear stand-alone are for an entire Git repository
+
+# --> check the source code for various characteristics
+src/main:
+    java:
+        practicalsix/RollAndSumDice.java:
+            ConfirmFileExists
+            CountSingleLineComments --language Java --count 4
+            CountMultipleLineComments --language Java --count 2
+            MatchFileFragment --fragment "TODO" --count 0 --exact
+            MatchFileFragment --fragment "Add Your Name Here" --count 0 --exact
+            MatchFileFragment --fragment "package practicalsix;" --count 1 --exact
+
+# --> check the source code for various characteristics
+src/main:
+    java:
+        practicalsix/Die.java:
+            ConfirmFileExists
+            CountSingleLineComments --language Java --count 4
+            CountMultipleLineComments --language Java --count 2
+            MatchFileFragment --fragment "TODO" --count 0 --exact
+            MatchFileFragment --fragment "Add Your Name Here" --count 0 --exact
+            MatchFileFragment --fragment "package practicalsix;" --count 1 --exact
+
+# --> check that the number of commits in the Git repository is beyond a threshold
+CountCommits --count 5
+
+# --> check that the program executes correctly and produces exactly 4 lines of output
+ExecuteCommand --command "gradle build"
+ExecuteCommand --command "gradle -q --console plain run"
+CountCommandOutput --command "gradle -q --console plain run" --count 4 --exact
+
+# --> check that the program produces the output sentences like the following:
+#
+# Portion of the output:
+#
+# Performing redaction on the following sentence:
+# I am a student enrolled in Computer Science 100 at Allegheny College.
+#
+# Redaction created the following sentence:
+# I am a student enrolled in Computer Science 100 at GGGGGGGGG College.
+#
+# Thanks for using the redaction program.
+# Have an awesome day.
+#
+# Note: checks for the specific numerical values that are fully determined by correct code
+MatchCommandFragment --command "gradle -q --console plain run" --count 1 --fragment "Face Value"
+MatchCommandFragment --command "gradle -q --console plain run" --count 1 --fragment "The Sum"
